@@ -1,0 +1,100 @@
+## Practical Machine Learning
+
+The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.
+
+## Downloading and cleaning data
+
+Data can be downloaded from provided URLs
+
+```{r}
+
+# Load necessary libraries
+
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(rattle)
+library(randomForest)
+library(corrplot)
+
+#Download dataset
+
+training <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+testing <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+
+#Create a partition on the training set
+
+part <- createDataPartition(training$classe, p = 0.7, list = FALSE)
+TrainSet <- training[part, ]
+TestSet <- training[-part, ]
+
+```
+
+We will be using 70% of the data for training purposes and the remaining 30% for testing purposes.
+
+```{r}
+dim(TrainSet)
+dim(TestSet)
+
+```
+
+
+Out of the 160 variables, we can exclude those wo contains NA or that are approx. zero and also the 5 used for ID.
+
+```{r}
+# remove NA
+TrainSet <- TrainSet[ , colSums(is.na(TrainSet)) == 0]
+TestSet <- TestSet[ , colSums(is.na(TestSet)) == 0]
+
+# remove variables with approx zero variance
+TrainSet<- TrainSet[, -nearZeroVar(TrainSet)]
+TestSet <- TestSet[, -nearZeroVar(TestSet)]
+
+# remove the first 5 columns -ID only
+
+TrainSet<- TrainSet[ , -c(1:5)] 
+TestSet <- TestSet[ , -c(1:5)]
+
+```
+
+We have now reduced our variables from 160 to 54
+
+```{r}
+dim(TrainSet)
+dim(TestSet)
+```
+
+## Training Model
+
+Let´s now try to model the cleaned data; we now from the course that random forest usually perform very well in this kind of inquiries so we will fit it to our datasets. The confusion matrix provide us a better overview about accuracy of the different models.
+
+
+```{r}
+set.seed(12345)
+ctr <- trainControl(method = "cv", number = 3, verboseIter = FALSE)
+RF <- train(classe ~., data = TrainSet, method = "rf", trControl = ctr)
+RF$finalModel
+```
+
+```{r}
+#prediction on test dataset
+predRF <- predict(RF, TestSet)
+#confusion matrix
+confMatRF <- confusionMatrix(predRF, TestSet$classe)
+confMatRF
+```
+
+With 99,75% accuracy we can say that our model is really good.
+
+## Apply the model to the test data
+
+We can finally apply the random forest model to the 20 cases provided as test-dataset-
+
+```{r}
+TEST <- predict(RF, testing)
+TEST
+
+```
+
+
+

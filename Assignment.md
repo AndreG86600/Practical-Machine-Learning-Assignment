@@ -6,7 +6,7 @@ The goal of your project is to predict the manner in which they did the exercise
 
 Data can be downloaded from provided URLs
 
-```{r}
+```r
 
 # Load necessary libraries
 
@@ -32,7 +32,7 @@ TestSet <- training[-part, ]
 
 We will be using 70% of the data for training purposes and the remaining 30% for testing purposes.
 
-```{r}
+```r
 dim(TrainSet)
 dim(TestSet)
 
@@ -41,7 +41,7 @@ dim(TestSet)
 
 Out of the 160 variables, we can exclude those wo contains NA or that are approx. zero and also the 5 used for ID.
 
-```{r}
+```r
 # remove NA
 TrainSet <- TrainSet[ , colSums(is.na(TrainSet)) == 0]
 TestSet <- TestSet[ , colSums(is.na(TestSet)) == 0]
@@ -59,7 +59,7 @@ TestSet <- TestSet[ , -c(1:5)]
 
 We have now reduced our variables from 160 to 54
 
-```{r}
+```r
 dim(TrainSet)
 dim(TestSet)
 ```
@@ -69,14 +69,14 @@ dim(TestSet)
 Let´s now try to model the cleaned data; we now from the course that random forest usually perform very well in this kind of inquiries so we will fit it to our datasets. The confusion matrix provide us a better overview about accuracy of the different models.
 
 
-```{r}
+```r
 set.seed(12345)
 ctr <- trainControl(method = "cv", number = 3, verboseIter = FALSE)
 RF <- train(classe ~., data = TrainSet, method = "rf", trControl = ctr)
 RF$finalModel
 ```
 
-```{r}
+```r
 #prediction on test dataset
 predRF <- predict(RF, TestSet)
 #confusion matrix
@@ -90,7 +90,7 @@ With 99,75% accuracy we can say that our model is really good.
 
 We can finally apply the random forest model to the 20 cases provided as test-dataset-
 
-```{r}
+```r
 TEST <- predict(RF, testing)
 TEST
 
